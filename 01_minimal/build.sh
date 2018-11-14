@@ -1,1 +1,1 @@
-ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet toy.native
+ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg llvm toy.native

@@ -1,5 +1,6 @@
 open Lexing
 open Lexer
+open Llvm
 
 let parse_with_error lexbuf =
     try Parser.prog Lexer.read lexbuf with
@@ -13,8 +14,12 @@ let main () =
     flush stdout;
     let input_string = read_line () in
     let lexbuf = Lexing.from_string input_string in
-    match parse_with_error lexbuf with
-      | _ -> print_endline "Parse successful"
+    let e = parse_with_error lexbuf in
+    begin
+        print_endline "Parse successful";
+        dump_value (Codegen.codegen_expr e);
+        print_newline ()
+    end
   end
 ;;
 

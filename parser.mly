@@ -1,3 +1,20 @@
+%token <string> ID
+%token <float> NUMBER
+%token LPAREN
+%token RPAREN
+%token COMMA
+%token DEF
+%token EXTERN
+%token EOF
+
+%token ADD
+%token SUB
+%token MUL
+%token DIV
+
+%left ADD SUB
+%left MUL DIV
+
 %start <ast.toplevel> prog
 
 %%

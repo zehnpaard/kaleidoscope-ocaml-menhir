@@ -22,5 +22,5 @@ rule read = parse
   | '-' { SUB }
   | '*' { MUL }
   | '/' { DIV }
-  | _ -> { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+  | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof { EOF }

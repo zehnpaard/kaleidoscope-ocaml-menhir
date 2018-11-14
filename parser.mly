@@ -15,35 +15,35 @@
 %left ADD SUB
 %left MUL DIV
 
-%start <ast.toplevel> prog
+%start <Ast.toplevel> prog
 
 %%
 
 prog:
-  | f = func; EOF { TFunction f }
+  | f = func; EOF { `TFunction f }
   | x = extern; EOF { x }
-  | e = expr; EOF { TFunction (Function (Prototype ("", [| |]), e)) }
+  | e = expr; EOF { `TFunction (`Function (`Prototype ("", []), e)) }
   ;
 
 func:
-  | DEF; p = proto; e = expr { Function (p, e) }
+  | DEF; p = proto; e = expr { `Function (p, e) }
   ;
 
 proto:
-  | i = ID; LPAREN; a = list (ID); RPAREN { Prototype (i, a) }
+  | i = ID; LPAREN; a = list (ID); RPAREN { `Prototype (i, a) }
   ;
 
 extern:
-  | EXTERN; p = proto { TExtern p }
+  | EXTERN; p = proto { `TExtern p }
   ;
 
 expr:
-  | n = NUMBER { Number n }
-  | i = ID; LPAREN; a = separated_list (COMMA, expr); RPAREN { Call (i, a) }
+  | n = NUMBER { `Number n }
+  | i = ID; LPAREN; a = separated_list (COMMA, expr); RPAREN { `Call (i, a) }
   | LPAREN; e = expr; RPAREN { e }
-  | i = ID { Variable i }
-  | i1 = ID; ADD; i2 = ID { Binary ('+', i1, i2) }
-  | i1 = ID; SUB; i2 = ID { Binary ('-', i1, i2) }
-  | i1 = ID; MUL; i2 = ID { Binary ('*', i1, i2) }
-  | i1 = ID; DIV; i2 = ID { Binary ('/', i1, i2) }
+  | i = ID { `Variable i }
+  | e1 = expr; ADD; e2 = expr { `Binary ('+', e1, e2) }
+  | e1 = expr; SUB; e2 = expr { `Binary ('-', e1, e2) }
+  | e1 = expr; MUL; e2 = expr { `Binary ('*', e1, e2) }
+  | e1 = expr; DIV; e2 = expr { `Binary ('/', e1, e2) }
   ;

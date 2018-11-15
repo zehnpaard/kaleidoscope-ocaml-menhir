@@ -15,11 +15,13 @@ let main () =
     let input_string = read_line () in
     let lexbuf = Lexing.from_string input_string in
     let e = parse_with_error lexbuf in
-    begin
-        print_endline "Parse successful";
-        dump_value (Codegen.codegen_expr e);
-        print_newline ()
-    end
+    match e with
+      | `TLMain func ->
+            begin
+                print_endline "Parse successful";
+                dump_value (Codegen.codegen_func func);
+                print_newline ()
+            end
   end
 ;;
 

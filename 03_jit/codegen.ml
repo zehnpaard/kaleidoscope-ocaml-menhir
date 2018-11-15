@@ -18,3 +18,16 @@ let rec codegen_expr = function
            | '-' -> build_sub lhs rhs "subtmp" builder
            | '*' -> build_mul lhs rhs "multmp" builder
            | _ -> raise (InvalidOperator op))
+
+let codegen_proto = function
+  | `Prototype (name, args) ->
+      let ft = function_type double_type [| |] in
+      declare_function name ft the_module
+
+let codegen_func = function
+  | `Function (proto, body) ->
+      let lproto = codegen_proto proto in
+      let bb = append_block context "entry" lproto in
+      position_at_end bb builder;
+      let _ = build_ret (codegen_expr body) builder in
+      lproto

@@ -9,12 +9,12 @@
 %left ADD SUB
 %left MUL
 
-%start <Ast.expr> prog
+%start <Ast.toplevel> prog
 
 %%
 
 prog:
-  | e = expr; EOF { e }
+  | e = expr; EOF { `TLMain (`Function (`Prototype ("", []), e)) }
   ;
 
 expr:

@@ -22,6 +22,14 @@ let rec codegen_expr = function
            | '-' -> build_sub lhs rhs "subtmp" builder
            | '*' -> build_mul lhs rhs "multmp" builder
            | _ -> raise (InvalidOperator op))
+  | `Call (fname, args) ->
+        let f =
+            (match lookup_function fname the_module with
+               | Some x -> x
+               | None ->  raise (Error "Unknown function name"))
+        in
+        let a = Array.of_list (List.map codegen_expr args) in
+        build_call f a "calltmp" builder
 
 let codegen_proto = function
   | `Prototype (name, args) ->

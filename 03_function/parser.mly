@@ -6,6 +6,7 @@
 %token LPAREN
 %token RPAREN
 %token DEF
+%token COMMA
 %token EOF
 
 %left ADD SUB
@@ -34,4 +35,5 @@ expr:
   | e1 = expr; ADD; e2 = expr { `BinOp ('+', e1, e2) }
   | e1 = expr; SUB; e2 = expr { `BinOp ('-', e1, e2) }
   | e1 = expr; MUL; e2 = expr { `BinOp ('*', e1, e2) }
+  | i = ID; LPAREN; args = separated_list(COMMA, expr); RPAREN { `Call (i, args) }
   ;

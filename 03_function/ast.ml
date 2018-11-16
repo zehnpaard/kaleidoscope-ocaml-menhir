@@ -2,6 +2,7 @@ type expr = [
   | `Variable of string
   | `Number of float
   | `BinOp of char * expr * expr
+  | `Call of string * expr list
 ]
 
 type proto = [ `Prototype of string * string list ]

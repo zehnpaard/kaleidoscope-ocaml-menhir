@@ -1,4 +1,5 @@
 type expr = [
+  | `Variable of string
   | `Number of float
   | `BinOp of char * expr * expr
 ]

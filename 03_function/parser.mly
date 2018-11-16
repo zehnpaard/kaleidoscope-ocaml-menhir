@@ -28,6 +28,7 @@ proto:
   | name = ID; LPAREN; args = list (ID); RPAREN { `Prototype (name, args) }
 
 expr:
+  | i = ID { `Variable i }
   | n = NUMBER { `Number n }
   | LPAREN; e = expr; RPAREN { e }
   | e1 = expr; ADD; e2 = expr { `BinOp ('+', e1, e2) }

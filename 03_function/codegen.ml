@@ -5,6 +5,7 @@ exception Error of string
 let context = global_context ()
 let the_module = create_module context "minimal"
 let builder = builder context
+let var_env:(string, llvalue) Hashtbl.t = Hashtbl.create 10
 let double_type = double_type context
 
 exception InvalidOperator of char
@@ -23,7 +24,9 @@ let codegen_proto = function
   | `Prototype (name, args) ->
       let arg_types = Array.make (List.length args) double_type in
       let ft = function_type double_type arg_types in
-      declare_function name ft the_module
+      let f = declare_function name ft the_module in
+      let create_var n a = (set_value_name n a; Hashtbl.add var_env n a) in
+      (Array.iter2 create_var (Array.of_list args) (params f); f)
 
 let codegen_func = function
   | `Function (proto, body) ->

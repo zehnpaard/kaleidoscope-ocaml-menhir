@@ -8,20 +8,20 @@ let parse_with_error lexbuf =
       | Parser.Error -> print_endline "Parser error"; exit (-1)
 ;;
 
+let generate_and_dump = function
+  | `TLMain func | `TLFunction func ->
+        dump_value (Codegen.codegen_func func)
+
 let main () =
   begin
     print_string "ready> "; 
     flush stdout;
     let input_string = read_line () in
     let lexbuf = Lexing.from_string input_string in
-    let e = parse_with_error lexbuf in
-    match e with
-      | `TLMain func | `TLFunction func ->
-            begin
-                print_endline "Parse successful";
-                dump_value (Codegen.codegen_func func);
-                print_newline ()
-            end
+    let es = parse_with_error lexbuf in
+    print_endline "Parse successful";
+    List.iter generate_and_dump es;
+    print_newline ()
   end
 ;;
 

@@ -7,18 +7,23 @@
 %token RPAREN
 %token DEF
 %token COMMA
+%token SEMICOLON
 %token EOF
 
 %left ADD SUB
 %left MUL
 
-%start <Ast.toplevel> prog
+%start <Ast.toplevel list> prog
 
 %%
 
 prog:
-  | e = expr; EOF { `TLMain (`Function (`Prototype ("", []), e)) }
-  | f = func; EOF { `TLFunction f }
+  | tls = list(toplevel); EOF { tls }
+  ;
+
+toplevel:
+  | e = expr; SEMICOLON { `TLMain (`Function (`Prototype ("", []), e)) }
+  | f = func; SEMICOLON { `TLFunction f }
   ;
 
 func:

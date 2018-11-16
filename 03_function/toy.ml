@@ -16,7 +16,7 @@ let main () =
     let lexbuf = Lexing.from_string input_string in
     let e = parse_with_error lexbuf in
     match e with
-      | `TLMain func ->
+      | `TLMain func | `TLFunction func ->
             begin
                 print_endline "Parse successful";
                 dump_value (Codegen.codegen_func func);

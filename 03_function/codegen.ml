@@ -21,7 +21,8 @@ let rec codegen_expr = function
 
 let codegen_proto = function
   | `Prototype (name, args) ->
-      let ft = function_type double_type [| |] in
+      let arg_types = Array.make (List.length args) double_type in
+      let ft = function_type double_type arg_types in
       declare_function name ft the_module
 
 let codegen_func = function

@@ -1,0 +1,28 @@
+open Lexing
+open Lexer
+open Llvm
+
+let parse_with_error lexbuf =
+    try Parser.prog Lexer.read lexbuf with
+      | SyntaxError msg -> print_endline msg; exit (-1)
+      | Parser.Error -> print_endline "Parser error"; exit (-1)
+;;
+
+let generate_and_dump = function
+  | `TLMain func | `TLFunction func ->
+        dump_value (Codegen.codegen_func func)
+
+let main () =
+  begin
+    print_string "ready> "; 
+    flush stdout;
+    let input_string = read_line () in
+    let lexbuf = Lexing.from_string input_string in
+    let es = parse_with_error lexbuf in
+    print_endline "Parse successful";
+    List.iter generate_and_dump es;
+    print_newline ()
+  end
+;;
+
+main ();;

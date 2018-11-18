@@ -27,6 +27,9 @@ let rec codegen_expr = function
           in
           ignore (build_store val_ v builder);
           val_
+  | `BinOp (':', e1, e2) ->
+        let _ = codegen_expr e1 in
+        codegen_expr e2
   | `BinOp (op, e1, e2) ->
         let lhs = codegen_expr e1 in
         let rhs = codegen_expr e2 in

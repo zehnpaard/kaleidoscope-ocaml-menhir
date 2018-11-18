@@ -13,8 +13,10 @@
 %token ELSE
 %token COMMA
 %token SEMICOLON
+%token COLON
 %token EOF
 
+%left COLON
 %left ASSIGN
 %left LT
 %left ADD SUB
@@ -49,6 +51,7 @@ expr:
   | e1 = expr; MUL; e2 = expr { `BinOp ('*', e1, e2) }
   | e1 = expr; LT; e2 = expr { `BinOp ('<', e1, e2) }
   | e1 = expr; ASSIGN; e2 = expr { `BinOp ('=', e1, e2) }
+  | e1 = expr; COLON; e2 = expr { `BinOp (':', e1, e2) }
   | i = ID; LPAREN; args = separated_list(COMMA, expr); RPAREN { `Call (i, args) }
   | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr { `If (c, e1, e2) }
   ;

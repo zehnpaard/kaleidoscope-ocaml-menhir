@@ -3,7 +3,7 @@ type expr = [
   | `Number of float
   | `BinOp of char * expr * expr
   | `Call of string * expr list
-  | `If of expr * epxr * expr
+  | `If of expr * expr * expr
 ]
 
 type proto = [ `Prototype of string * string list ]

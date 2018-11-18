@@ -21,6 +21,9 @@ let rec codegen_expr = function
            | '+' -> build_add lhs rhs "addtmp" builder
            | '-' -> build_sub lhs rhs "subtmp" builder
            | '*' -> build_mul lhs rhs "multmp" builder
+           | '<' -> 
+                   let cmp = build_fcmp Fcmp.Ult lhs rhs "cmptmp" builder in
+                   build_uitofp cmp double_type "booltmp" builder
            | _ -> raise (InvalidOperator op))
   | `Call (fname, args) ->
         let f =

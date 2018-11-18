@@ -11,8 +11,10 @@ let double_type = double_type context
 exception InvalidOperator of char
 let rec codegen_expr = function
   | `Variable var ->
-        (try Hashtbl.find var_env var
-         with Not_found -> raise (Error "unknown variable name"))
+        let v = (try Hashtbl.find var_env var
+                 with Not_found -> raise (Error "unknown variable name"))
+        in
+        build_load v var builder
   | `Number n -> const_float double_type n
   | `BinOp (op, e1, e2) ->
         let lhs = codegen_expr e1 in

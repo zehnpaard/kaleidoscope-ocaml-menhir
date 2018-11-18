@@ -16,6 +16,17 @@ let rec codegen_expr = function
         in
         build_load v var builder
   | `Number n -> const_float double_type n
+  | `BinOp ('=', e1, e2) ->
+          let var = match e1 with
+                      | `Variable var -> var
+                      | _ -> raise (Error "Assignment to non-variable")
+          in
+          let val_ = codegen_expr e2 in
+          let v = (try Hashtbl.find var_env var
+                   with Not_found -> raise (Error "unknown variable name"))
+          in
+          ignore (build_store val_ v builder);
+          val_
   | `BinOp (op, e1, e2) ->
         let lhs = codegen_expr e1 in
         let rhs = codegen_expr e2 in

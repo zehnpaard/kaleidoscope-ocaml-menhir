@@ -26,6 +26,7 @@ rule read = parse
   | '-' { SUB }
   | '*' { MUL }
   | '<' { LT }
+  | '=' { ASSIGN }
   | ',' { COMMA }
   | ';' { SEMICOLON }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }

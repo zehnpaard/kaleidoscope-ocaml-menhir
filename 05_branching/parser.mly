@@ -3,6 +3,7 @@
 %token ADD
 %token SUB
 %token MUL
+%token LT
 %token LPAREN
 %token RPAREN
 %token DEF
@@ -10,6 +11,7 @@
 %token SEMICOLON
 %token EOF
 
+%left LT
 %left ADD SUB
 %left MUL
 
@@ -40,5 +42,6 @@ expr:
   | e1 = expr; ADD; e2 = expr { `BinOp ('+', e1, e2) }
   | e1 = expr; SUB; e2 = expr { `BinOp ('-', e1, e2) }
   | e1 = expr; MUL; e2 = expr { `BinOp ('*', e1, e2) }
+  | e1 = expr; LT; e2 = expr { `BinOp ('<', e1, e2) }
   | i = ID; LPAREN; args = separated_list(COMMA, expr); RPAREN { `Call (i, args) }
   ;

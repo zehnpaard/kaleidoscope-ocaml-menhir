@@ -16,7 +16,6 @@ let in_venv venv v = List.exists (fun x -> x = v) venv
 let get_pcount = function `Prototype (fname, params) -> List.length params
 
 let rec check_expr fenv venv = function
-  | `Number _ -> ()
   | `BinOp (op, e1, e2) -> 
           begin
               check_expr fenv venv e1; 
@@ -32,6 +31,7 @@ let rec check_expr fenv venv = function
           if not (pcount = acount)
           then raise (Error ("Function " ^ fname ^ " called with incorrect number of args"))
           else List.iter (check_expr fenv venv) es
+  | _ -> ()
 
 let check_func_name fenv = function
   | `Prototype (fname, _) ->

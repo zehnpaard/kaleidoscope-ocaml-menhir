@@ -81,10 +81,26 @@ let codegen_proto = function
       let create_var n a = (set_value_name n a; Hashtbl.add var_env n a) in
       (Array.iter2 create_var (Array.of_list args) (params f); f)
 
+let create_entry_block_alloca f var =
+    let builder = builder_at context (instr_begin (entry_block f)) in
+    build_alloca double_type var builder
+
+let create_argument_allocas f p =
+    let args = match p with
+                 | `Prototype (name, args) -> args
+    in
+    let g var v =
+        let alloca = create_entry_block_alloca f var in
+        ignore (build_store v alloca builder);
+        Hashtbl.add var_env var alloca
+    in
+    Array.iter2 g (Array.of_list args) (params f)
+
 let codegen_func = function
   | `Function (proto, body) ->
-      let lproto = codegen_proto proto in
-      let bb = append_block context "entry" lproto in
+      let f = codegen_proto proto in
+      let bb = append_block context "entry" f in
       position_at_end bb builder;
+      create_argument_allocas f proto;
       let _ = build_ret (codegen_expr body) builder in
-      lproto
+      f

@@ -103,6 +103,43 @@ let rec codegen_expr = function
             | Some ov -> Hashtbl.add var_env var ov
             | None -> ());
           body
+  | `For (var, start_, end_, update_, body_) ->
+          let f = block_parent (insertion_block builder) in
+          let alloca = create_entry_block_alloca f var in
+          let start_val = codegen_expr start_ in
+          ignore (build_store start_val alloca builder);
+
+          let loop_bb = append_block context "loop" f in
+          ignore (build_br loop_bb builder);
+          position_at_end loop_bb builder;
+
+          let old_val = Hashtbl.find_opt var_env var in
+          Hashtbl.add var_env var alloca;
+
+          ignore (codegen_expr body_);
+
+          let update_val = match update_ with
+            | Some u -> codegen_expr u
+            | None -> const_float double_type 1.0
+          in
+
+          let end_val = codegen_expr end_ in
+
+          let cur_val = build_load alloca var builder in
+          let next_val = build_add cur_val update_val "nextval" builder in
+          ignore (build_store next_val alloca builder);
+
+          let zero = const_float double_type 0.0 in
+          let end_cond = build_fcmp Fcmp.One end_val zero "loopcond" builder in
+          let after_bb = append_block context "afterloop" f in
+          ignore (build_cond_br end_cond loop_bb after_bb builder);
+          position_at_end after_bb builder;
+
+          (match old_val with
+             | Some v -> Hashtbl.add var_env var v
+             | None -> ());
+
+          const_null double_type
 
   | _ -> raise (Error "Encountered unknown expr type")
 

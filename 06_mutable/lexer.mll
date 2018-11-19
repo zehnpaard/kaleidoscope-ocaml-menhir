@@ -18,6 +18,8 @@ rule read = parse
   | "if" { IF }
   | "then" { THEN }
   | "else" { ELSE }
+  | "var" { VAR }
+  | "in" { IN }
   | id { ID (Lexing.lexeme lexbuf) }
   | white { read lexbuf }
   | '(' { LPAREN }
@@ -26,7 +28,9 @@ rule read = parse
   | '-' { SUB }
   | '*' { MUL }
   | '<' { LT }
+  | '=' { ASSIGN }
   | ',' { COMMA }
   | ';' { SEMICOLON }
+  | ':' { COLON }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof { EOF }

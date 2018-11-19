@@ -4,16 +4,23 @@
 %token SUB
 %token MUL
 %token LT
+%token ASSIGN
 %token LPAREN
 %token RPAREN
 %token DEF
 %token IF
 %token THEN
 %token ELSE
+%token VAR
+%token IN
 %token COMMA
 %token SEMICOLON
+%token COLON
 %token EOF
 
+%left IN
+%left COLON
+%left ASSIGN
 %left LT
 %left ADD SUB
 %left MUL
@@ -46,6 +53,10 @@ expr:
   | e1 = expr; SUB; e2 = expr { `BinOp ('-', e1, e2) }
   | e1 = expr; MUL; e2 = expr { `BinOp ('*', e1, e2) }
   | e1 = expr; LT; e2 = expr { `BinOp ('<', e1, e2) }
+  | e1 = expr; ASSIGN; e2 = expr { `BinOp ('=', e1, e2) }
+  | e1 = expr; COLON; e2 = expr { `BinOp (':', e1, e2) }
+  | VAR; i = ID; IN; e = expr { `Var (i, None, e) }
+  | VAR; i = ID; ASSIGN; e1 = expr; IN; e2 = expr { `Var (i, Some e1, e2) }
   | i = ID; LPAREN; args = separated_list(COMMA, expr); RPAREN { `Call (i, args) }
   | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr { `If (c, e1, e2) }
   ;

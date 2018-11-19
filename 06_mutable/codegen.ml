@@ -8,12 +8,32 @@ let builder = builder context
 let var_env:(string, llvalue) Hashtbl.t = Hashtbl.create 10
 let double_type = double_type context
 
+let create_entry_block_alloca f var =
+    let builder = builder_at context (instr_begin (entry_block f)) in
+    build_alloca double_type var builder
+
 exception InvalidOperator of char
 let rec codegen_expr = function
   | `Variable var ->
-        (try Hashtbl.find var_env var
-         with Not_found -> raise (Error "unknown variable name"))
+        let v = (try Hashtbl.find var_env var
+                 with Not_found -> raise (Error "unknown variable name"))
+        in
+        build_load v var builder
   | `Number n -> const_float double_type n
+  | `BinOp ('=', e1, e2) ->
+          let var = match e1 with
+                      | `Variable var -> var
+                      | _ -> raise (Error "Assignment to non-variable")
+          in
+          let val_ = codegen_expr e2 in
+          let v = (try Hashtbl.find var_env var
+                   with Not_found -> raise (Error "unknown variable name"))
+          in
+          ignore (build_store val_ v builder);
+          val_
+  | `BinOp (':', e1, e2) ->
+        let _ = codegen_expr e1 in
+        codegen_expr e2
   | `BinOp (op, e1, e2) ->
         let lhs = codegen_expr e1 in
         let rhs = codegen_expr e2 in
@@ -68,6 +88,21 @@ let rec codegen_expr = function
           position_at_end merge_bb builder;
 
           phi
+  | `Var (var, o, e) ->
+          let v = match o with
+                    | None -> const_float double_type 0.0
+                    | Some x -> codegen_expr x
+          in
+          let old_v = Hashtbl.find_opt var_env var in
+          let f = block_parent (insertion_block builder) in
+          let alloca = create_entry_block_alloca f var in
+          ignore (build_store v alloca builder);
+          Hashtbl.add var_env var alloca;
+          let body = codegen_expr e in
+          (match old_v with
+            | Some ov -> Hashtbl.add var_env var ov
+            | None -> ());
+          body
 
   | _ -> raise (Error "Encountered unknown expr type")
 
@@ -79,10 +114,22 @@ let codegen_proto = function
       let create_var n a = (set_value_name n a; Hashtbl.add var_env n a) in
       (Array.iter2 create_var (Array.of_list args) (params f); f)
 
+let create_argument_allocas f p =
+    let args = match p with
+                 | `Prototype (name, args) -> args
+    in
+    let g var v =
+        let alloca = create_entry_block_alloca f var in
+        ignore (build_store v alloca builder);
+        Hashtbl.add var_env var alloca
+    in
+    Array.iter2 g (Array.of_list args) (params f)
+
 let codegen_func = function
   | `Function (proto, body) ->
-      let lproto = codegen_proto proto in
-      let bb = append_block context "entry" lproto in
+      let f = codegen_proto proto in
+      let bb = append_block context "entry" f in
       position_at_end bb builder;
+      create_argument_allocas f proto;
       let _ = build_ret (codegen_expr body) builder in
-      lproto
+      f

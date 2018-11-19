@@ -8,6 +8,10 @@ let builder = builder context
 let var_env:(string, llvalue) Hashtbl.t = Hashtbl.create 10
 let double_type = double_type context
 
+let create_entry_block_alloca f var =
+    let builder = builder_at context (instr_begin (entry_block f)) in
+    build_alloca double_type var builder
+
 exception InvalidOperator of char
 let rec codegen_expr = function
   | `Variable var ->
@@ -84,6 +88,21 @@ let rec codegen_expr = function
           position_at_end merge_bb builder;
 
           phi
+  | `Var (var, o, e) ->
+          let v = match o with
+                    | None -> const_float double_type 0.0
+                    | Some x -> codegen_expr x
+          in
+          let old_v = Hashtbl.find_opt var_env var in
+          let f = block_parent (insertion_block builder) in
+          let alloca = create_entry_block_alloca f var in
+          ignore (build_store v alloca builder);
+          Hashtbl.add var_env var alloca;
+          let body = codegen_expr e in
+          (match old_v with
+            | Some ov -> Hashtbl.add var_env var ov
+            | None -> ());
+          body
 
   | _ -> raise (Error "Encountered unknown expr type")
 
@@ -94,10 +113,6 @@ let codegen_proto = function
       let f = declare_function name ft the_module in
       let create_var n a = (set_value_name n a; Hashtbl.add var_env n a) in
       (Array.iter2 create_var (Array.of_list args) (params f); f)
-
-let create_entry_block_alloca f var =
-    let builder = builder_at context (instr_begin (entry_block f)) in
-    build_alloca double_type var builder
 
 let create_argument_allocas f p =
     let args = match p with

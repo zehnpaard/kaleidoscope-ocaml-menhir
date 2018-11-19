@@ -19,6 +19,7 @@ rule read = parse
   | "then" { THEN }
   | "else" { ELSE }
   | "var" { VAR }
+  | "for" { FOR }
   | "in" { IN }
   | id { ID (Lexing.lexeme lexbuf) }
   | white { read lexbuf }

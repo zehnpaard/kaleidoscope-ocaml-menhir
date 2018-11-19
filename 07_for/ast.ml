@@ -5,6 +5,7 @@ type expr = [
   | `Call of string * expr list
   | `If of expr * expr * expr
   | `Var of string * expr option * expr
+  | `For of string * expr * expr * expr option * expr
 ]
 
 type proto = [ `Prototype of string * string list ]

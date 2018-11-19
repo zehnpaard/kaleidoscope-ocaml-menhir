@@ -18,6 +18,8 @@ rule read = parse
   | "if" { IF }
   | "then" { THEN }
   | "else" { ELSE }
+  | "var" { VAR }
+  | "in" { IN }
   | id { ID (Lexing.lexeme lexbuf) }
   | white { read lexbuf }
   | '(' { LPAREN }

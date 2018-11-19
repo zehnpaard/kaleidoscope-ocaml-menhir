@@ -18,6 +18,7 @@
 %token COLON
 %token EOF
 
+%left IN
 %left COLON
 %left ASSIGN
 %left LT
@@ -55,7 +56,7 @@ expr:
   | e1 = expr; ASSIGN; e2 = expr { `BinOp ('=', e1, e2) }
   | e1 = expr; COLON; e2 = expr { `BinOp (':', e1, e2) }
   | VAR; i = ID; IN; e = expr { `Var (i, None, e) }
-  | VAR; i = ID; ASSIGN; e1 = expr; IN; e2 = expr { `Var (i, Some e1, e) }
+  | VAR; i = ID; ASSIGN; e1 = expr; IN; e2 = expr { `Var (i, Some e1, e2) }
   | i = ID; LPAREN; args = separated_list(COMMA, expr); RPAREN { `Call (i, args) }
   | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr { `If (c, e1, e2) }
   ;
